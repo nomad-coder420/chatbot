@@ -1,0 +1,26 @@
+.avaChatResponseContainer {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 16px;
+  padding-right: 18px;
+  align-self: flex-start;
+}
+
+.avaChatIconContainer {
+  margin-right: 10px;
+}
+
+.avaChatIcon {
+  width: 36px;
+}
+
+.avaChatResponse {
+  background-color: #eaecf0;
+  padding: 12px;
+  border-radius: 0 16px 16px 16px;
+}
+
+.avaChatResponseText {
+  font-size: 16px;
+  font-weight: 400;
+}

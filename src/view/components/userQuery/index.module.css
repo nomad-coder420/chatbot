@@ -1,0 +1,19 @@
+.userQueryContainer {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 16px;
+  padding-left: 18px;
+  align-self: flex-end;
+}
+
+.userQuery {
+  background-color: #7d37ff;
+  padding: 12px;
+  border-radius: 16px 0 16px 16px;
+}
+
+.userQueryText {
+  font-size: 16px;
+  font-weight: 400;
+  color: #fff;
+}

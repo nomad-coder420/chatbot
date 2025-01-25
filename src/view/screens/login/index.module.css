@@ -1,0 +1,64 @@
+.loginScreenContainer {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 64px;
+  text-align: center;
+}
+
+.loginImageContainer {
+  margin-bottom: 16px;
+}
+
+.loginImage {
+  width: 100%;
+  max-width: 320px;
+}
+
+.loginHeading {
+  font-weight: 700;
+  font-size: 28px;
+  margin-bottom: 16px;
+}
+
+.loginSubHeading {
+  font-weight: 500;
+  font-size: 16px;
+  color: #667085;
+}
+
+.loginFormContainer {
+  width: 100%;
+  margin-top: 32px;
+}
+
+.loginButton {
+  width: 100%;
+  padding: 0 20px;
+  background-color: #7d37ff;
+  border: none;
+  color: white;
+  border-radius: 16px;
+  cursor: pointer;
+}
+
+.loginButtonContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.loginButtonText {
+  font-weight: 600;
+  font-size: 16px;
+  color: white;
+}
+
+.loginButtonIcon {
+  font-family: "Poppins";
+  font-weight: 600;
+  font-size: 36px;
+  color: white;
+}

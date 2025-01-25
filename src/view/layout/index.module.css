@@ -1,0 +1,26 @@
+.layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  align-items: center;
+  justify-content: center;
+
+  /* background-color: rgba(225, 222, 244, 0.4); */
+  background-color: rgb(249 250 251);
+}
+
+.appContainer {
+  width: 470px;
+  height: 80vh;
+  background-color: white;
+  border-radius: 16px;
+  box-shadow: 0 3px 5.2px 0 hsla(0, 0%, 71%, 0.25);
+}
+
+@media (max-width: 480px) {
+  .appContainer {
+    width: 100%;
+    height: 100vh;
+    border-radius: 0;
+  }
+}

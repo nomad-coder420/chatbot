@@ -1,0 +1,71 @@
+.chatScreen {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 28px;
+}
+
+.chatHeaderContainer {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.headerImageContainer {
+  margin: 0 28px;
+}
+
+.avaImage {
+  width: 72px;
+}
+
+.headerIconContainer {
+  width: 40px;
+}
+
+.logoutIconContainer {
+  justify-self: flex-end;
+}
+
+.logoutIcon {
+  width: 24px;
+  height: 24px;
+}
+
+.chatScreenTitleContainer {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.chatScreenHeading {
+  font-weight: 700;
+  font-size: 18px;
+  margin-bottom: 9px;
+}
+
+.chatScreenSubHeading {
+  font-weight: 500;
+  font-size: 14px;
+  color: #667085;
+}
+
+.chatHistoryContainer {
+  width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.chatHistory {
+  width: 100%;
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
