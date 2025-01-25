@@ -23,6 +23,10 @@ module.exports = {
         },
       },
       {
+        test: /\.(png|jpe?g|gif|svg)$/i,
+        type: "asset/resource", // Use Webpack 5 asset module to handle images
+      },
+      {
         test: /\.css$/,
         use: [
           "style-loader",
