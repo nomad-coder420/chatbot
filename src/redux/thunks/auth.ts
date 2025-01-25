@@ -8,6 +8,10 @@ export const getAccessToken = () => {
   return localStorage.getItem("accessToken");
 };
 
+export const removeAccessToken = () => {
+  localStorage.removeItem("accessToken");
+};
+
 export const loginUser = async (authCode: string) => {
   try {
     const response = await callLoginApi(authCode);
@@ -25,4 +29,8 @@ export const loginUser = async (authCode: string) => {
     alert("Something went wrong, please try again later");
     return;
   }
+};
+
+export const logoutUser = () => {
+  removeAccessToken();
 };

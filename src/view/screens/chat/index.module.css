@@ -29,6 +29,7 @@
 
 .logoutIconContainer {
   justify-self: flex-end;
+  cursor: pointer;
 }
 
 .logoutIcon {

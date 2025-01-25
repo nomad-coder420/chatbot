@@ -2,12 +2,20 @@ import React from "react";
 import classes from "./index.module.css";
 import avaImage from "../../../assets/images/ava.png";
 import logoutIcon from "../../../assets/svg/logout.svg";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import UserQuery from "../../components/userQuery";
 import AvaChatResponse from "../../components/avaChatResponse";
 import ChatScreenInput from "../../components/chatScreenInput";
+import { logoutUser } from "../../../redux/thunks/auth";
 
 const ChatScreenHeader = () => {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logoutUser();
+    navigate("/login");
+  };
+
   return (
     <div className={classes.chatHeaderContainer}>
       <div className={classes.headerIconContainer}></div>
@@ -15,14 +23,17 @@ const ChatScreenHeader = () => {
         <img src={avaImage} alt="ava" className={classes.avaImage} />
       </div>
       <div className={classes.headerIconContainer}>
-        <div className={classes.logoutIconContainer}>
-          <Link to="/login">
-            <img
-              src={logoutIcon}
-              alt="logoutIcon"
-              className={classes.logoutIcon}
-            />
-          </Link>
+        <div
+          className={classes.logoutIconContainer}
+          onClick={() => {
+            handleLogout();
+          }}
+        >
+          <img
+            src={logoutIcon}
+            alt="logoutIcon"
+            className={classes.logoutIcon}
+          />
         </div>
       </div>
     </div>
