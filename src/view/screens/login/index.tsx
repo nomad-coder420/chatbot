@@ -3,7 +3,7 @@ import classes from "./index.module.css";
 import loginImage from "../../../assets/images/loginImage.png";
 import { CodeResponse, useGoogleLogin } from "@react-oauth/google";
 import Loader from "../../components/loader";
-import { loginUser } from "../../../redux/thunks/auth";
+import { loginUser } from "../../../redux/thunks/auth.thunk";
 import { useNavigate } from "react-router-dom";
 
 const LoginScreen: React.FC = () => {
