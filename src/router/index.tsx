@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import LoginScreen from "../view/screens/login/";
 import ChatScreen from "../view/screens/chat/";
-import { getAccessToken } from "../redux/thunks/auth";
+import { getAccessToken } from "../redux/thunks/auth.thunk";
 
 const AppRouter = () => {
   const access = getAccessToken();
