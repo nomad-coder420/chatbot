@@ -6,7 +6,7 @@ export const loginUser = async (authCode: string) => {
 
     console.log(response);
 
-    return response;
+    return true;
   } catch (err) {
     console.log(err);
     alert("Something went wrong, please try again later");

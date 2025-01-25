@@ -4,13 +4,19 @@ import loginImage from "../../../assets/images/loginImage.png";
 import { CodeResponse, useGoogleLogin } from "@react-oauth/google";
 import Loader from "../../components/loader";
 import { loginUser } from "../../../redux/thunks/auth";
+import { useNavigate } from "react-router-dom";
 
 const LoginScreen: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleLoginSuccess = async (credentialResponse: CodeResponse) => {
-    await loginUser(credentialResponse.code);
+    const success = await loginUser(credentialResponse.code);
     setIsLoading(false);
+
+    if (success) {
+      navigate("/chat");
+    }
   };
 
   const handleLoginError = (error: any) => {
