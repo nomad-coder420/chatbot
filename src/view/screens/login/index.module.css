@@ -62,3 +62,10 @@
   font-size: 36px;
   color: white;
 }
+
+.loaderContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 15px 0;
+}
