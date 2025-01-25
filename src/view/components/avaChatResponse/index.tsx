@@ -2,6 +2,11 @@ import React from "react";
 import classes from "./index.module.css";
 import avaImage from "../../../assets/images/ava.png";
 import { QueryStatus } from "../../../constants/types";
+import BeatLoader from "../beatLoader";
+
+const AvaChatLoader = () => {
+  return <BeatLoader width={12} height={12} color="#7d37ff" />;
+};
 
 const AvaChatResponse = ({
   response,
@@ -17,12 +22,13 @@ const AvaChatResponse = ({
       </div>
       <div className={classes.avaChatResponse}>
         <p className={classes.avaChatResponseText}>
-          {[
-            QueryStatus.SENDING,
-            QueryStatus.FAILED,
-          ].includes(status)
-            ? `STATUS:: ${status}`
-            : response}
+          {status === QueryStatus.SENDING ? (
+            <AvaChatLoader />
+          ) : status === QueryStatus.FAILED ? (
+            `STATUS:: ${status}`
+          ) : (
+            response
+          )}
         </p>
       </div>
     </div>
