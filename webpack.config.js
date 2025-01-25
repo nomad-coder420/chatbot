@@ -1,9 +1,13 @@
 const path = require("path");
+const dotenv = require("dotenv");
+const webpack = require('webpack');
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 
+dotenv.config();
+
 module.exports = {
-  mode: "development", // Change to 'production' for production builds
-  entry: "./src/index.tsx", // Entry point for your app
+  mode: "development",
+  entry: "./src/index.tsx", // Entry point for app
   output: {
     path: path.resolve(__dirname, "dist"), // Output directory
     filename: "bundle.js", // Output file name
@@ -50,11 +54,14 @@ module.exports = {
     ],
   },
   resolve: {
-    extensions: [".ts", ".tsx", ".js", ".jsx"], // Resolve these extensions
+    extensions: [".ts", ".tsx", ".js", ".jsx"],
   },
   plugins: [
     new HtmlWebpackPlugin({
       template: path.resolve(__dirname, "public", "index.html"), // Path to the HTML template
+    }),
+    new webpack.DefinePlugin({
+      'process.env.REACT_APP_GOOGLE_CLIENT_ID': JSON.stringify(process.env.REACT_APP_GOOGLE_CLIENT_ID),
     }),
   ],
   devServer: {
