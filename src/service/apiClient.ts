@@ -41,11 +41,21 @@ const apiClient = {
 
     return Promise.reject(response);
   },
-  authPost: async (url: string, data: any, token: string) => {
+  authPost: async (
+    url: string,
+    data: any,
+    token: string | null,
+    signal?: AbortSignal
+  ) => {
+    if (!token) {
+      throw new Error("Access token missing");
+    }
+
     const response = await apiInstance.post(url, data, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
+      signal,
     });
 
     if (response.status === 200) {
