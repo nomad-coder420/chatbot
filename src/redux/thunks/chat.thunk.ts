@@ -69,7 +69,7 @@ export const getResponse = async ({
 }: {
   queryId: string;
   setResponseCallback: (response: string) => void;
-  onCompleteCallback: () => void;
+  onCompleteCallback: (response: string) => void;
   navigate: NavigateFunction;
 }) => {
   try {
@@ -114,11 +114,10 @@ export const getResponse = async ({
           if (done) break;
           buffer += decoder.decode(value, { stream: true });
 
-          console.log("Buffer:", buffer);
           setResponseCallback(buffer);
         }
       }
-      onCompleteCallback();
+      onCompleteCallback(buffer);
     };
 
     fetchStream().catch(console.error);

@@ -123,16 +123,16 @@ const ChatHistory = ({
 };
 
 const ChatScreen = () => {
-  const chatContainerRef = useRef<HTMLDivElement>(null);
-  const currentQueryRef = useRef<string | null>(null);
-  const currentResponseRef = useRef<string | null>(null);
-  const currentStatusRef = useRef<QueryStatus | null>(null);
+  let chatContainerRef = useRef<HTMLDivElement>(null);
+  let currentQueryRef = useRef<string | null>(null);
+  let currentStatusRef = useRef<QueryStatus | null>(null);
 
   const [isHistoryLoading, setIsHistoryLoading] = useState(true);
   const [askingQuery, setAskingQuery] = useState(false);
   const [chatHistory, setChatHistory] = useState<ChatMessageSchema[]>([]);
   const [isLastPage, setIsLastPage] = useState<boolean>(false);
   const [userQuery, setUserQuery] = useState<string>("");
+  const [currentResponse, setCurrentResponse] = useState<string>("");
 
   const navigate = useNavigate();
 
@@ -180,15 +180,18 @@ const ChatScreen = () => {
     };
   }, []);
 
+  console.log("component re-rendered");
   const setResponse = (response: string) => {
-    currentResponseRef.current = response;
+    console.log("setResponse", response);
+    setCurrentResponse(response);
+    currentStatusRef.current = QueryStatus.IN_PROGRESS;
   };
 
-  const handleQueryResponseComplete = () => {
+  const handleQueryResponseComplete = (response: string) => {
     setChatHistory([
       {
         query: currentQueryRef.current || "",
-        response: currentResponseRef.current || "",
+        response: response || "",
         status: QueryStatus.SUCCEEDED,
         queryId: null,
         responseId: null,
@@ -211,7 +214,7 @@ const ChatScreen = () => {
     const response = await askQuery(userQuery, navigate);
 
     if (!response) {
-      handleQueryResponseComplete();
+      handleQueryResponseComplete("");
       return;
     }
 
@@ -241,7 +244,7 @@ const ChatScreen = () => {
             {askingQuery && (
               <CurrentChat
                 query={`CURRENT:: ${currentQueryRef.current || ""}`}
-                response={currentResponseRef.current || ""}
+                response={currentResponse || ""}
                 status={currentStatusRef.current || QueryStatus.SENDING}
               />
             )}
