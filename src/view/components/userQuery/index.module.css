@@ -1,6 +1,6 @@
 .userQueryContainer {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   margin-bottom: 16px;
   padding-left: 18px;
   align-self: flex-end;
@@ -16,4 +16,15 @@
   font-size: 16px;
   font-weight: 400;
   color: #fff;
+}
+
+.errorIconContainer {
+  display: flex;
+  align-items: center;
+  margin-right: 8px;
+}
+
+.errorIcon {
+  width: 24px;
+  height: 24px;
 }

@@ -13,6 +13,7 @@ import {
   getChatHistory,
   getResponse,
 } from "../../../redux/thunks/chat.thunk";
+import Loader from "../../components/loader";
 
 const ChatScreenHeader = () => {
   const navigate = useNavigate();
@@ -68,7 +69,7 @@ const ChatBlock = ({
 }) => {
   return (
     <div className={classes.chatContainer}>
-      <UserQuery query={query} />
+      <UserQuery query={query} status={status} />
       <AvaChatResponse response={response} status={status} />
     </div>
   );
@@ -88,26 +89,24 @@ const CurrentChat = ({
 
 const ChatHistory = ({
   chatHistory,
-  chatContainerRef,
 }: {
   chatHistory: Array<ChatMessageSchema>;
-  chatContainerRef: React.RefObject<HTMLDivElement | null>;
 }) => {
-  console.log(chatHistory);
-  // console.log("currentChat", currentChat);
-
   return (
-    <div className={classes.chatHistory} ref={chatContainerRef}>
+    <div className={classes.chatHistory}>
       {chatHistory &&
         chatHistory.map((chat, index) => {
           const status = chat.status;
+          const response = chat.response;
 
           const isValidStatus = [
             QueryStatus.SUCCEEDED,
             QueryStatus.FAILED,
           ].includes(status);
+          const isValidResponse = response && response.length > 0;
 
-          const validStatus = isValidStatus ? status : QueryStatus.FAILED;
+          const validStatus =
+            isValidStatus && isValidResponse ? status : QueryStatus.FAILED;
 
           return (
             <ChatBlock
@@ -123,11 +122,13 @@ const ChatHistory = ({
 };
 
 const ChatScreen = () => {
-  let chatContainerRef = useRef<HTMLDivElement>(null);
+  let chatContainerRef = useRef<HTMLDivElement | null>(null);
   let currentQueryRef = useRef<string | null>(null);
+  let currentQueryIdRef = useRef<string | null>(null);
   let currentStatusRef = useRef<QueryStatus | null>(null);
 
   const [isHistoryLoading, setIsHistoryLoading] = useState(true);
+  const [isPrevHistoryLoading, setIsPrevHistoryLoading] = useState(false);
   const [askingQuery, setAskingQuery] = useState(false);
   const [chatHistory, setChatHistory] = useState<ChatMessageSchema[]>([]);
   const [isLastPage, setIsLastPage] = useState<boolean>(false);
@@ -135,6 +136,29 @@ const ChatScreen = () => {
   const [currentResponse, setCurrentResponse] = useState<string>("");
 
   const navigate = useNavigate();
+
+  const loadChatHistory = async (
+    lastQueryId: string | null = null,
+    signal: AbortSignal
+  ) => {
+    const response = await getChatHistory(lastQueryId, signal, navigate);
+
+    if (response) {
+      setChatHistory([
+        ...chatHistory,
+        ...response.chatHistory.map((chat) => {
+          return {
+            query: chat.query,
+            queryId: chat.query_id,
+            response: chat.response,
+            responseId: chat.response_id,
+            status: chat.status,
+          };
+        }),
+      ]);
+      setIsLastPage(response.isLastPage);
+    }
+  };
 
   useEffect(() => {
     const token = getAccessToken();
@@ -147,27 +171,8 @@ const ChatScreen = () => {
 
     const getHistory = async () => {
       setIsHistoryLoading(true);
-      const response = await getChatHistory(null, controller.signal, navigate);
-
-      if (response) {
-        setChatHistory([
-          ...response.chatHistory.map((chat) => {
-            return {
-              query: chat.query,
-              queryId: chat.query_id,
-              response: chat.response,
-              responseId: chat.response_id,
-              status: chat.status,
-            };
-          }),
-        ]);
-        setIsLastPage(response.isLastPage);
-      }
+      loadChatHistory(null, controller.signal);
       setIsHistoryLoading(false);
-      if (chatContainerRef.current) {
-        chatContainerRef.current.scrollTop =
-          chatContainerRef.current.scrollHeight;
-      }
     };
 
     console.log("Get chat history");
@@ -175,10 +180,26 @@ const ChatScreen = () => {
 
     return () => {
       console.log("Clean up chat history");
+
       controller.abort();
       setChatHistory([]);
+      chatContainerRef.current = null;
+      currentQueryRef.current = null;
+      currentStatusRef.current = null;
+      currentQueryIdRef.current = null;
+      setAskingQuery(false);
+      setUserQuery("");
+      setCurrentResponse("");
+      setIsHistoryLoading(false);
     };
   }, []);
+
+  const scrollToBottom = () => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop =
+        chatContainerRef.current.scrollHeight;
+    }
+  };
 
   console.log("component re-rendered");
   const setResponse = (response: string) => {
@@ -193,13 +214,14 @@ const ChatScreen = () => {
         query: currentQueryRef.current || "",
         response: response || "",
         status: QueryStatus.SUCCEEDED,
-        queryId: null,
+        queryId: currentQueryIdRef.current,
         responseId: null,
       },
       ...chatHistory,
     ]);
 
     setAskingQuery(false);
+    scrollToBottom();
   };
 
   const handleQueryResponseFailed = () => {
@@ -208,12 +230,13 @@ const ChatScreen = () => {
         query: currentQueryRef.current || "",
         response: "",
         status: QueryStatus.FAILED,
-        queryId: null,
+        queryId: currentQueryIdRef.current,
         responseId: null,
       },
       ...chatHistory,
     ]);
     setAskingQuery(false);
+    scrollToBottom();
   };
 
   const handleQuerySend = async () => {
@@ -227,10 +250,14 @@ const ChatScreen = () => {
 
     const response = await askQuery(userQuery, navigate);
 
+    scrollToBottom();
+
     if (!response) {
       handleQueryResponseComplete("");
       return;
     }
+
+    currentQueryIdRef.current = response.queryId;
 
     await getResponse({
       queryId: response?.queryId,
@@ -241,6 +268,18 @@ const ChatScreen = () => {
     });
   };
 
+  const loadOlderMessages = async () => {
+    setIsPrevHistoryLoading(true);
+
+    const controller = new AbortController();
+    await loadChatHistory(
+      chatHistory[chatHistory.length - 1].queryId,
+      controller.signal
+    );
+
+    setIsPrevHistoryLoading(false);
+  };
+
   return (
     <div className={classes.chatScreen}>
       {isHistoryLoading ? (
@@ -248,21 +287,35 @@ const ChatScreen = () => {
       ) : (
         <>
           <ChatScreenHeader />
-          <div className={classes.chatHistoryContainer}>
-            {chatHistory && chatHistory.length < 10 ? (
-              <ChatScreenTitle />
-            ) : null}
-            <ChatHistory
-              chatHistory={chatHistory}
-              chatContainerRef={chatContainerRef}
-            />
+          <div className={classes.chatHistoryContainer} ref={chatContainerRef}>
             {askingQuery && (
               <CurrentChat
-                query={`CURRENT:: ${currentQueryRef.current || ""}`}
+                query={currentQueryRef.current || ""}
                 response={currentResponse || ""}
                 status={currentStatusRef.current || QueryStatus.SENDING}
               />
             )}
+            <ChatHistory chatHistory={chatHistory} />
+            {chatHistory && chatHistory.length < 10 ? (
+              <ChatScreenTitle />
+            ) : null}
+            {!isLastPage &&
+              (isPrevHistoryLoading ? (
+                <div className={classes.loaderContainer}>
+                  <Loader color="#7d37ff" />
+                </div>
+              ) : (
+                <div className={classes.loadMoreContainer}>
+                  <div
+                    className={classes.loadMoreButton}
+                    onClick={() => {
+                      loadOlderMessages();
+                    }}
+                  >
+                    <p>See older messages</p>
+                  </div>
+                </div>
+              ))}
           </div>
 
           <ChatScreenInput

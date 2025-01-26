@@ -58,7 +58,7 @@
   width: 100%;
   flex: 1;
   display: flex;
-  flex-direction: column;
+  flex-direction: column-reverse;
   align-items: center;
   overflow-y: auto;
 }
@@ -76,4 +76,26 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+.loadMoreContainer {
+  margin-bottom: 20px;
+}
+
+.loadMoreButton {
+  padding: 6px;
+  cursor: pointer;
+}
+
+.loadMoreButton p {
+  color: #7d37ff;
+  font-weight: 500;
+  font-size: 16px;
+}
+
+.loaderContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 15px 0;
 }
