@@ -8,5 +8,6 @@ export const urlConstants = {
     askQuery: "/api/v1/chat/ask_query",
     getHistory: "/api/v1/chat/get_history",
     getResponse: "/api/v1/chat/get_response",
+    deleteQuery: "/api/v1/chat/delete_query",
   },
 };

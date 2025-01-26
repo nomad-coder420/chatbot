@@ -36,3 +36,18 @@ export const callGetHistoryApi = async (
 
   return response.data;
 };
+
+export const callDeleteApi = async (
+  queryId: string,
+  token: string | null
+): Promise<string> => {
+  const data = { query_id: queryId };
+
+  const response = await apiClient.authPost(
+    urlConstants.chat.deleteQuery,
+    data,
+    token
+  );
+
+  return response.data;
+};

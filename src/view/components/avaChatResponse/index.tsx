@@ -11,9 +11,11 @@ const AvaChatLoader = () => {
 const AvaChatResponse = ({
   response,
   status,
+  isCurrentChat,
 }: {
   response: string | null;
   status: QueryStatus;
+  isCurrentChat?: boolean;
 }) => {
   if (status === QueryStatus.FAILED) return;
 
@@ -25,7 +27,8 @@ const AvaChatResponse = ({
         <img src={avaImage} alt="ava" className={classes.avaChatIcon} />
       </div>
       <div className={classes.avaChatResponse}>
-        {status === QueryStatus.SENDING || status === QueryStatus.CREATED ? (
+        {isCurrentChat &&
+        [QueryStatus.SENDING, QueryStatus.CREATED].includes(status) ? (
           <AvaChatLoader />
         ) : (
           <p className={classes.avaChatResponseText}>{cleanedResponse}</p>

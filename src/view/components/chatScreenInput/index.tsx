@@ -7,11 +7,13 @@ const ChatScreenInput = ({
   setUserQuery,
   handleQuerySend,
   disabled = false,
+  chatInputRef,
 }: {
   userQuery: string;
   setUserQuery: (query: string) => void;
   handleQuerySend: () => void;
   disabled?: boolean;
+  chatInputRef: React.RefObject<HTMLInputElement | null>;
 }) => {
   const [isFocused, setIsFocused] = useState(true);
 
@@ -39,6 +41,7 @@ const ChatScreenInput = ({
       <div className={classes.inputBoxContainer}>
         <input
           type="text"
+          ref={chatInputRef}
           placeholder="Your question"
           className={classes.inputBox}
           value={userQuery}

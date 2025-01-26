@@ -1,8 +1,12 @@
 import axios, { AxiosError } from "axios";
 import { NavigateFunction } from "react-router-dom";
 
-import { callAskQueryApi, callGetHistoryApi } from "../../service/chat";
-import { getAccessToken, removeAccessToken } from "./auth.thunk";
+import {
+  callAskQueryApi,
+  callDeleteApi,
+  callGetHistoryApi,
+} from "../../service/chat";
+import { getAccessToken, logoutUser } from "./auth.thunk";
 import { apiBaseUrl, urlConstants } from "../../constants";
 
 export const askQuery = async (query: string, navigate: NavigateFunction) => {
@@ -19,8 +23,7 @@ export const askQuery = async (query: string, navigate: NavigateFunction) => {
 
     if (err instanceof AxiosError) {
       if (err.response?.status === 498) {
-        removeAccessToken();
-        navigate("/login");
+        logoutUser(navigate);
       }
     }
 
@@ -46,8 +49,7 @@ export const getChatHistory = async (
   } catch (err) {
     if (err instanceof AxiosError) {
       if (err.response?.status === 498) {
-        removeAccessToken();
-        navigate("/login");
+        logoutUser(navigate);
       }
     }
 
@@ -129,8 +131,29 @@ export const getResponse = async ({
   } catch (err) {
     if (err instanceof AxiosError) {
       if (err.response?.status === 498) {
-        removeAccessToken();
-        navigate("/login");
+        logoutUser(navigate);
+      }
+    }
+
+    alert("Something went wrong, please try again later");
+    return;
+  }
+};
+
+export const deleteChatQuery = async (
+  queryId: string,
+  navigate: NavigateFunction
+) => {
+  try {
+    const token = getAccessToken();
+    const response = await callDeleteApi(queryId, token);
+    return response;
+  } catch (err) {
+    console.error(err);
+
+    if (err instanceof AxiosError) {
+      if (err.response?.status === 498) {
+        logoutUser(navigate);
       }
     }
 

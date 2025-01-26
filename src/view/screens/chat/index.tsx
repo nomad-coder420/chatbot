@@ -10,6 +10,7 @@ import { getAccessToken, logoutUser } from "../../../redux/thunks/auth.thunk";
 import { ChatMessageSchema, QueryStatus } from "../../../constants/types";
 import {
   askQuery,
+  deleteChatQuery,
   getChatHistory,
   getResponse,
 } from "../../../redux/thunks/chat.thunk";
@@ -19,8 +20,7 @@ const ChatScreenHeader = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    logoutUser();
-    navigate("/login");
+    logoutUser(navigate);
   };
 
   return (
@@ -62,15 +62,34 @@ const ChatBlock = ({
   query,
   response,
   status,
+  isCurrentChat,
+  deleteQuery,
+  editQuery,
+  isEditDeleteLoading,
 }: {
   query: string;
   response: string | null;
   status: QueryStatus;
+  isCurrentChat?: boolean;
+  deleteQuery?: () => Promise<void>;
+  editQuery?: () => Promise<void>;
+  isEditDeleteLoading?: boolean;
 }) => {
   return (
     <div className={classes.chatContainer}>
-      <UserQuery query={query} status={status} />
-      <AvaChatResponse response={response} status={status} />
+      <UserQuery
+        query={query}
+        status={status}
+        isCurrentChat={isCurrentChat}
+        deleteQuery={deleteQuery}
+        editQuery={editQuery}
+        isEditDeleteLoading={isEditDeleteLoading}
+      />
+      <AvaChatResponse
+        response={response}
+        status={status}
+        isCurrentChat={isCurrentChat}
+      />
     </div>
   );
 };
@@ -84,13 +103,26 @@ const CurrentChat = ({
   response: string | null;
   status: QueryStatus;
 }) => {
-  return <ChatBlock query={query} response={response} status={status} />;
+  return (
+    <ChatBlock
+      query={query}
+      response={response}
+      status={status}
+      isCurrentChat
+    />
+  );
 };
 
 const ChatHistory = ({
   chatHistory,
+  deleteQuery,
+  editQuery,
+  isEditDeleteLoading,
 }: {
   chatHistory: Array<ChatMessageSchema>;
+  deleteQuery: (queryId: string) => Promise<void>;
+  editQuery: (queryId: string, currentQuery: string) => Promise<void>;
+  isEditDeleteLoading: boolean;
 }) => {
   return (
     <div className={classes.chatHistory}>
@@ -114,6 +146,9 @@ const ChatHistory = ({
               query={chat.query}
               response={chat.response}
               status={validStatus}
+              deleteQuery={() => deleteQuery(chat.queryId)}
+              editQuery={() => editQuery(chat.queryId, chat.query)}
+              isEditDeleteLoading={isEditDeleteLoading}
             />
           );
         })}
@@ -123,12 +158,14 @@ const ChatHistory = ({
 
 const ChatScreen = () => {
   let chatContainerRef = useRef<HTMLDivElement | null>(null);
+  let chatInputRef = useRef<HTMLInputElement | null>(null);
   let currentQueryRef = useRef<string | null>(null);
   let currentQueryIdRef = useRef<string | null>(null);
   let currentStatusRef = useRef<QueryStatus | null>(null);
 
   const [isHistoryLoading, setIsHistoryLoading] = useState(true);
   const [isPrevHistoryLoading, setIsPrevHistoryLoading] = useState(false);
+  const [isEditDeleteLoading, setIsEditDeleteLoading] = useState(false);
   const [askingQuery, setAskingQuery] = useState(false);
   const [chatHistory, setChatHistory] = useState<ChatMessageSchema[]>([]);
   const [isLastPage, setIsLastPage] = useState<boolean>(false);
@@ -160,10 +197,28 @@ const ChatScreen = () => {
     }
   };
 
+  const resetChatHistory = async (signal: AbortSignal) => {
+    const response = await getChatHistory(null, signal, navigate);
+    if (response) {
+      setChatHistory([
+        ...response.chatHistory.map((chat) => {
+          return {
+            query: chat.query,
+            queryId: chat.query_id,
+            response: chat.response,
+            responseId: chat.response_id,
+            status: chat.status,
+          };
+        }),
+      ]);
+      setIsLastPage(response.isLastPage);
+    }
+  };
+
   useEffect(() => {
     const token = getAccessToken();
     if (!token) {
-      navigate("/login");
+      logoutUser(navigate);
       alert("Please login to continue");
     }
 
@@ -171,7 +226,7 @@ const ChatScreen = () => {
 
     const getHistory = async () => {
       setIsHistoryLoading(true);
-      loadChatHistory(null, controller.signal);
+      await resetChatHistory(controller.signal);
       setIsHistoryLoading(false);
     };
 
@@ -214,7 +269,7 @@ const ChatScreen = () => {
         query: currentQueryRef.current || "",
         response: response || "",
         status: QueryStatus.SUCCEEDED,
-        queryId: currentQueryIdRef.current,
+        queryId: currentQueryIdRef.current || "",
         responseId: null,
       },
       ...chatHistory,
@@ -230,7 +285,7 @@ const ChatScreen = () => {
         query: currentQueryRef.current || "",
         response: "",
         status: QueryStatus.FAILED,
-        queryId: currentQueryIdRef.current,
+        queryId: currentQueryIdRef.current || "",
         responseId: null,
       },
       ...chatHistory,
@@ -280,6 +335,34 @@ const ChatScreen = () => {
     setIsPrevHistoryLoading(false);
   };
 
+  const deleteQuery = async (queryId: string) => {
+    const controller = new AbortController();
+
+    setIsEditDeleteLoading(true);
+    const response = await deleteChatQuery(queryId, navigate);
+
+    await resetChatHistory(controller.signal);
+    setIsEditDeleteLoading(false);
+  };
+
+  const editQuery = async (queryId: string, currentQuery: string) => {
+    const controller = new AbortController();
+
+    setIsEditDeleteLoading(true);
+    const response = await deleteChatQuery(queryId, navigate);
+
+    await resetChatHistory(controller.signal);
+
+    setUserQuery(currentQuery);
+
+    setIsEditDeleteLoading(false);
+
+    if (chatInputRef.current) {
+      console.log("Focusing input", chatInputRef.current);
+      chatInputRef.current.focus();
+    }
+  };
+
   return (
     <div className={classes.chatScreen}>
       {isHistoryLoading ? (
@@ -295,7 +378,12 @@ const ChatScreen = () => {
                 status={currentStatusRef.current || QueryStatus.SENDING}
               />
             )}
-            <ChatHistory chatHistory={chatHistory} />
+            <ChatHistory
+              chatHistory={chatHistory}
+              deleteQuery={deleteQuery}
+              editQuery={editQuery}
+              isEditDeleteLoading={isEditDeleteLoading}
+            />
             {chatHistory && chatHistory.length < 10 ? (
               <ChatScreenTitle />
             ) : null}
@@ -322,6 +410,8 @@ const ChatScreen = () => {
             userQuery={userQuery}
             setUserQuery={setUserQuery}
             handleQuerySend={handleQuerySend}
+            disabled={askingQuery || isEditDeleteLoading}
+            chatInputRef={chatInputRef}
           />
         </>
       )}

@@ -1,3 +1,4 @@
+import { NavigateFunction } from "react-router-dom";
 import { callLoginApi } from "../../service/auth";
 
 export const setAccessToken = (token: string) => {
@@ -31,6 +32,7 @@ export const loginUser = async (authCode: string) => {
   }
 };
 
-export const logoutUser = () => {
+export const logoutUser = (navigate: NavigateFunction) => {
   removeAccessToken();
+  navigate("/login");
 };

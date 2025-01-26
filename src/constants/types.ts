@@ -8,8 +8,8 @@ export enum QueryStatus {
 
 export interface ChatMessageSchema {
   query: string;
-  queryId: string | null;
-  response: string | null;
+  queryId: string;
+  response: string;
   responseId: string | null;
   status: QueryStatus;
 }
