@@ -12,24 +12,24 @@ const AvaChatResponse = ({
   response,
   status,
 }: {
-  response: string;
+  response: string | null;
   status: QueryStatus;
 }) => {
+  if (status === QueryStatus.SUCCEEDED && !response) return;
+
   return (
     <div className={classes.avaChatResponseContainer}>
       <div className={classes.avaChatIconContainer}>
         <img src={avaImage} alt="ava" className={classes.avaChatIcon} />
       </div>
       <div className={classes.avaChatResponse}>
-        <p className={classes.avaChatResponseText}>
-          {status === QueryStatus.SENDING ? (
-            <AvaChatLoader />
-          ) : status === QueryStatus.FAILED ? (
-            `STATUS:: ${status}`
-          ) : (
-            response
-          )}
-        </p>
+        {status === QueryStatus.SENDING || status === QueryStatus.CREATED ? (
+          <AvaChatLoader />
+        ) : status === QueryStatus.FAILED ? (
+          `STATUS:: ${status}`
+        ) : (
+          <p className={classes.avaChatResponseText}>{response}</p>
+        )}
       </div>
     </div>
   );

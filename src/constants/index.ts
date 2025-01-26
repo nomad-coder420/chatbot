@@ -7,5 +7,6 @@ export const urlConstants = {
   chat: {
     askQuery: "/api/v1/chat/ask_query",
     getHistory: "/api/v1/chat/get_history",
+    getResponse: "/api/v1/chat/get_response",
   },
 };

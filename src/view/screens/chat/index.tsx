@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import classes from "./index.module.css";
 import avaImage from "../../../assets/images/ava.png";
 import logoutIcon from "../../../assets/svg/logout.svg";
@@ -8,7 +8,11 @@ import AvaChatResponse from "../../components/avaChatResponse";
 import ChatScreenInput from "../../components/chatScreenInput";
 import { getAccessToken, logoutUser } from "../../../redux/thunks/auth.thunk";
 import { ChatMessageSchema, QueryStatus } from "../../../constants/types";
-import { askQuery, getChatHistory } from "../../../redux/thunks/chat.thunk";
+import {
+  askQuery,
+  getChatHistory,
+  getResponse,
+} from "../../../redux/thunks/chat.thunk";
 
 const ChatScreenHeader = () => {
   const navigate = useNavigate();
@@ -53,21 +57,65 @@ const ChatScreenTitle = () => {
   );
 };
 
+const ChatBlock = ({
+  query,
+  response,
+  status,
+}: {
+  query: string;
+  response: string | null;
+  status: QueryStatus;
+}) => {
+  return (
+    <div className={classes.chatContainer}>
+      <UserQuery query={query} />
+      <AvaChatResponse response={response} status={status} />
+    </div>
+  );
+};
+
+const CurrentChat = ({
+  query,
+  response,
+  status,
+}: {
+  query: string;
+  response: string | null;
+  status: QueryStatus;
+}) => {
+  return <ChatBlock query={query} response={response} status={status} />;
+};
+
 const ChatHistory = ({
   chatHistory,
+  chatContainerRef,
 }: {
   chatHistory: Array<ChatMessageSchema>;
+  chatContainerRef: React.RefObject<HTMLDivElement | null>;
 }) => {
   console.log(chatHistory);
+  // console.log("currentChat", currentChat);
+
   return (
-    <div className={classes.chatHistory}>
+    <div className={classes.chatHistory} ref={chatContainerRef}>
       {chatHistory &&
         chatHistory.map((chat, index) => {
+          const status = chat.status;
+
+          const isValidStatus = [
+            QueryStatus.SUCCEEDED,
+            QueryStatus.FAILED,
+          ].includes(status);
+
+          const validStatus = isValidStatus ? status : QueryStatus.FAILED;
+
           return (
-            <div key={index} className={classes.chatContainer}>
-              <UserQuery query={chat.query} />
-              {chat.response && <AvaChatResponse response={chat.response} status={chat.status} />}
-            </div>
+            <ChatBlock
+              key={index}
+              query={chat.query}
+              response={chat.response}
+              status={validStatus}
+            />
           );
         })}
     </div>
@@ -75,6 +123,11 @@ const ChatHistory = ({
 };
 
 const ChatScreen = () => {
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+  const currentQueryRef = useRef<string | null>(null);
+  const currentResponseRef = useRef<string | null>(null);
+  const currentStatusRef = useRef<QueryStatus | null>(null);
+
   const [isHistoryLoading, setIsHistoryLoading] = useState(true);
   const [askingQuery, setAskingQuery] = useState(false);
   const [chatHistory, setChatHistory] = useState<ChatMessageSchema[]>([]);
@@ -86,19 +139,19 @@ const ChatScreen = () => {
   useEffect(() => {
     const token = getAccessToken();
     if (!token) {
-      alert("Please login to continue");
       navigate("/login");
+      alert("Please login to continue");
     }
 
     const controller = new AbortController();
 
     const getHistory = async () => {
       setIsHistoryLoading(true);
-      const response = await getChatHistory(null, controller.signal);
+      const response = await getChatHistory(null, controller.signal, navigate);
 
       if (response) {
         setChatHistory([
-          ...response.chatHistory.reverse().map((chat) => {
+          ...response.chatHistory.map((chat) => {
             return {
               query: chat.query,
               queryId: chat.query_id,
@@ -111,6 +164,10 @@ const ChatScreen = () => {
         setIsLastPage(response.isLastPage);
       }
       setIsHistoryLoading(false);
+      if (chatContainerRef.current) {
+        chatContainerRef.current.scrollTop =
+          chatContainerRef.current.scrollHeight;
+      }
     };
 
     console.log("Get chat history");
@@ -123,38 +180,47 @@ const ChatScreen = () => {
     };
   }, []);
 
+  const setResponse = (response: string) => {
+    currentResponseRef.current = response;
+  };
+
+  const handleQueryResponseComplete = () => {
+    setChatHistory([
+      {
+        query: currentQueryRef.current || "",
+        response: currentResponseRef.current || "",
+        status: QueryStatus.SUCCEEDED,
+        queryId: null,
+        responseId: null,
+      },
+      ...chatHistory,
+    ]);
+
+    setAskingQuery(false);
+  };
+
   const handleQuerySend = async () => {
     if (askingQuery || userQuery.length === 0) return;
 
+    currentQueryRef.current = userQuery;
+    currentStatusRef.current = QueryStatus.SENDING;
+
     setAskingQuery(true);
-    setChatHistory([
-      ...chatHistory,
-      {
-        query: userQuery,
-        queryId: null,
-        response: null,
-        responseId: null,
-        status: QueryStatus.SENDING,
-      },
-    ]);
     setUserQuery("");
 
-    const response = await askQuery(userQuery);
+    const response = await askQuery(userQuery, navigate);
 
-    setChatHistory((prevHistory) => {
-      const updatedHistory = [...prevHistory];
-      const lastItem = prevHistory[prevHistory.length - 1];
+    if (!response) {
+      handleQueryResponseComplete();
+      return;
+    }
 
-      updatedHistory[updatedHistory.length - 1] = {
-        ...lastItem,
-        queryId: response?.queryId || null,
-        responseId: response?.responseId || null,
-        status: response?.status || QueryStatus.FAILED,
-      };
-
-      return updatedHistory;
+    await getResponse({
+      queryId: response?.queryId,
+      setResponseCallback: setResponse,
+      onCompleteCallback: handleQueryResponseComplete,
+      navigate,
     });
-    setAskingQuery(false);
   };
 
   return (
@@ -164,12 +230,21 @@ const ChatScreen = () => {
       ) : (
         <>
           <ChatScreenHeader />
-
           <div className={classes.chatHistoryContainer}>
             {chatHistory && chatHistory.length < 10 ? (
               <ChatScreenTitle />
             ) : null}
-            <ChatHistory chatHistory={chatHistory} />
+            <ChatHistory
+              chatHistory={chatHistory}
+              chatContainerRef={chatContainerRef}
+            />
+            {askingQuery && (
+              <CurrentChat
+                query={`CURRENT:: ${currentQueryRef.current || ""}`}
+                response={currentResponseRef.current || ""}
+                status={currentStatusRef.current || QueryStatus.SENDING}
+              />
+            )}
           </div>
 
           <ChatScreenInput
