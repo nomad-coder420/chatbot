@@ -16,8 +16,6 @@ export interface ChatMessageSchema {
 
 export interface AskQueryResponseSchema {
   query_id: string;
-  response_id: string;
-  status: QueryStatus;
 }
 
 export interface ChatHistoryResponseSchema {
