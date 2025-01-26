@@ -65,11 +65,13 @@ export const getResponse = async ({
   queryId,
   setResponseCallback,
   onCompleteCallback,
+  onErrorCallback,
   navigate,
 }: {
   queryId: string;
   setResponseCallback: (response: string) => void;
   onCompleteCallback: (response: string) => void;
+  onErrorCallback: () => void;
   navigate: NavigateFunction;
 }) => {
   try {
@@ -120,7 +122,10 @@ export const getResponse = async ({
       onCompleteCallback(buffer);
     };
 
-    fetchStream().catch(console.error);
+    fetchStream().catch((error) => {
+      console.error("Error fetching stream:", error);
+      onErrorCallback();
+    });
   } catch (err) {
     if (err instanceof AxiosError) {
       if (err.response?.status === 498) {

@@ -18,7 +18,7 @@ const AppRouter = () => {
           }
         />
         <Route path="/login" element={<LoginScreen />} />
-        <Route path="/chat/" element={<ChatScreen />} />
+        <Route path="/chat" element={<ChatScreen />} />
       </Routes>
     </BrowserRouter>
   );

@@ -202,6 +202,20 @@ const ChatScreen = () => {
     setAskingQuery(false);
   };
 
+  const handleQueryResponseFailed = () => {
+    setChatHistory([
+      {
+        query: currentQueryRef.current || "",
+        response: "",
+        status: QueryStatus.FAILED,
+        queryId: null,
+        responseId: null,
+      },
+      ...chatHistory,
+    ]);
+    setAskingQuery(false);
+  };
+
   const handleQuerySend = async () => {
     if (askingQuery || userQuery.length === 0) return;
 
@@ -222,6 +236,7 @@ const ChatScreen = () => {
       queryId: response?.queryId,
       setResponseCallback: setResponse,
       onCompleteCallback: handleQueryResponseComplete,
+      onErrorCallback: handleQueryResponseFailed,
       navigate,
     });
   };

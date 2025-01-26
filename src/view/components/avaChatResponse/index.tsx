@@ -17,6 +17,8 @@ const AvaChatResponse = ({
 }) => {
   if (status === QueryStatus.SUCCEEDED && !response) return;
 
+  const cleanedResponse = response?.replace(/\\n/g, "")?.replace("<end>", "");
+
   return (
     <div className={classes.avaChatResponseContainer}>
       <div className={classes.avaChatIconContainer}>
@@ -28,7 +30,7 @@ const AvaChatResponse = ({
         ) : status === QueryStatus.FAILED ? (
           `STATUS:: ${status}`
         ) : (
-          <p className={classes.avaChatResponseText}>{response}</p>
+          <p className={classes.avaChatResponseText}>{cleanedResponse}</p>
         )}
       </div>
     </div>
