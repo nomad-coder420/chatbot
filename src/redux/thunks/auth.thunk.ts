@@ -34,5 +34,5 @@ export const loginUser = async (authCode: string) => {
 
 export const logoutUser = (navigate: NavigateFunction) => {
   removeAccessToken();
-  navigate("/");
+  navigate("/login");
 };

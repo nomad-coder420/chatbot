@@ -219,7 +219,6 @@ const ChatScreen = () => {
     const token = getAccessToken();
     if (!token) {
       logoutUser(navigate);
-      alert("Please login to continue");
     }
 
     const controller = new AbortController();
