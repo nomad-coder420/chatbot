@@ -32,44 +32,46 @@ const ChatScreenInput = ({
   };
 
   return (
-    <div
-      className={classes.chatInputContainer}
-      style={{
-        borderTop: isFocused ? "1px solid #7d37ff" : "1px solid #d9d9d9",
-      }}
-    >
-      <div className={classes.inputBoxContainer}>
-        <input
-          type="text"
-          ref={chatInputRef}
-          placeholder="Your question"
-          className={classes.inputBox}
-          value={userQuery}
-          onChange={(e) => {
-            setUserQuery(e.target.value);
-          }}
-          onKeyDown={handleKeyDown}
-          disabled={disabled}
-          onFocus={() => {
-            setIsFocused(true);
-          }}
-          onBlur={() => {
-            setIsFocused(false);
-          }}
-          autoFocus
-        />
-      </div>
+    <div className={classes.chatInputContainer}>
       <div
-        className={classes.sendButtonContainer}
-        onClick={() => {
-          handleSend();
-        }}
+        className={classes.inputContainer}
         style={{
-          opacity: isSendDisabled ? 0.5 : 1,
-          cursor: isSendDisabled ? "not-allowed" : "pointer",
+          borderTop: isFocused ? "1px solid #7d37ff" : "1px solid #d9d9d9",
         }}
       >
-        <img src={sendIcon} alt="sendIcon" className={classes.sendIcon} />
+        <div className={classes.inputBoxContainer}>
+          <input
+            type="text"
+            ref={chatInputRef}
+            placeholder="Your question"
+            className={classes.inputBox}
+            value={userQuery}
+            onChange={(e) => {
+              setUserQuery(e.target.value);
+            }}
+            onKeyDown={handleKeyDown}
+            disabled={disabled}
+            onFocus={() => {
+              setIsFocused(true);
+            }}
+            onBlur={() => {
+              setIsFocused(false);
+            }}
+            autoFocus
+          />
+        </div>
+        <div
+          className={classes.sendButtonContainer}
+          onClick={() => {
+            handleSend();
+          }}
+          style={{
+            opacity: isSendDisabled ? 0.5 : 1,
+            cursor: isSendDisabled ? "not-allowed" : "pointer",
+          }}
+        >
+          <img src={sendIcon} alt="sendIcon" className={classes.sendIcon} />
+        </div>
       </div>
     </div>
   );

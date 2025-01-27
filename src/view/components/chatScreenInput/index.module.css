@@ -1,11 +1,14 @@
 .chatInputContainer {
   width: 100%;
+  margin-top: 12px;
+}
+
+.inputContainer {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-top: 1px solid #e5e7eb;
   padding-top: 12px;
-  margin-top: 12px;
+  margin: 0 18px;
 }
 
 .inputBoxContainer {
@@ -32,4 +35,10 @@
 
 .sendIcon {
   width: 24px;
+}
+
+@media (max-width: 480px) {
+  .inputContainer {
+    margin: 0 14px;
+  }
 }
