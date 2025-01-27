@@ -63,6 +63,9 @@ module.exports = {
     new webpack.DefinePlugin({
       'process.env.REACT_APP_GOOGLE_CLIENT_ID': JSON.stringify(process.env.REACT_APP_GOOGLE_CLIENT_ID),
     }),
+    new webpack.DefinePlugin({
+      'process.env.REACT_APP_API_BASE_URL': JSON.stringify(process.env.REACT_APP_API_BASE_URL),
+    }),
   ],
   devServer: {
     static: "./dist", // Serve files from 'dist'
