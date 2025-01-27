@@ -349,6 +349,8 @@ const ChatScreen = () => {
     const controller = new AbortController();
 
     setIsEditDeleteLoading(true);
+    if (askingQuery) return;
+
     const response = await deleteChatQuery(queryId, navigate);
 
     await resetChatHistory(controller.signal);
