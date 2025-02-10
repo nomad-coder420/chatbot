@@ -257,9 +257,11 @@ const ChatScreen = () => {
 
   console.log("component re-rendered");
   const setResponse = (response: string) => {
-    console.log("setResponse", response);
     setCurrentResponse(response);
-    currentStatusRef.current = QueryStatus.IN_PROGRESS;
+    if (currentStatusRef?.current !== QueryStatus.IN_PROGRESS) {
+      currentStatusRef.current = QueryStatus.IN_PROGRESS;
+    }
+    scrollToBottom();
   };
 
   const handleQueryResponseComplete = (response: string) => {
@@ -275,7 +277,9 @@ const ChatScreen = () => {
     ]);
 
     setAskingQuery(false);
-    scrollToBottom();
+    setTimeout(() => {
+      scrollToBottom();
+    }, 500);
   };
 
   const handleQueryResponseFailed = () => {

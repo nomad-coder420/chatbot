@@ -28,11 +28,7 @@ const AvaChatResponse = ({
       </div>
       <div className={classes.avaChatResponse}>
         {isCurrentChat &&
-        [
-          QueryStatus.SENDING,
-          QueryStatus.CREATED,
-          QueryStatus.IN_PROGRESS,
-        ].includes(status) ? (
+        [QueryStatus.SENDING, QueryStatus.CREATED].includes(status) ? (
           <AvaChatLoader />
         ) : (
           <p className={classes.avaChatResponseText}>{cleanedResponse}</p>
